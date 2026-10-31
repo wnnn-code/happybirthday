@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="UTF-8">
+        <title></title>
+        <style>
+            body {
+                background-color: black;
+                margin: 0;
+                height: 100vh;
+                
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                user-select: none;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            #stage {
+                width: 100vw;
+                height: 100dvh;
+                /* border: 1px white solid; */
+                
+                position: relative;
+                overflow: hidden;
+            }
+
+            #talkbox {
+                width: 90%;
+                max-width: 800px;
+
+                height: 20%;
+                color: white;
+                border: 3px white solid;
+                
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%,-50%);
+                
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                
+                font-size: 20px;
+                white-space: pre-wrap;
+                text-align: center;
+
+                opacity: 0;
+            }
+
+            #cake {
+                min-width: 300px;
+                width: 30%;
+                max-width: 800px;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%,-50%);
+
+                opacity: 0;
+            }
+
+            #notice {
+                width: 90%;
+                max-width: 500px;
+                min-width: 300px;
+
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%,-50%);
+
+                color: white;
+                border: 2px solid white;
+                padding: 20px 10px;
+                user-select: none;
+
+                opacity: 0;
+            }
+
+            #noticetitle {
+                font-size: 1.5em;
+            }
+
+            #noticebutton {
+                width: 40%;
+                height: 10%;
+
+                background-color: transparent;
+                color: white;
+
+                border: 2px solid white;
+
+                font-size: 1.5em;
+
+                cursor: pointer;
+
+                transition: 0.3s;
+            }
+
+            #noticebutton:hover {
+                background-color: white;
+                color: black;
+            }
+
+            #noticebutton:active {
+                background-color: gray;
+                transform: scale(0.9);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="stage">
+            <div id="notice">
+                <p>
+                    <span id="noticetitle">小提醒：</span><br>
+                    <br>
+                    這是一個為你準備的小小生日祝福！<br>
+                    建議使用全螢幕觀看，<br>
+                    並在安靜的環境中慢慢閱讀。<br>
+                    <br>
+                    點擊畫面中的對話框，<br>
+                    可以加快文字顯示，或繼續下一句。&emsp;&emsp;&emsp;&emsp;&emsp;<br>
+                    <br>
+                    這個網站沒有公開的入口，<br>
+                    只有取得連結的人才能進來。<br>
+                    <br>
+                    <br>
+                    <button id="noticebutton">了解</button>
+                </p>
+                
+            </div>
+        </div>
+        <script>
+            const cake = new Image();
+            cake.src = "./img/birthday cake.jpg";
+            cake.id = "cake"
+
+            const stage = document.getElementById("stage");
+
+            const talkbox = document.createElement("div");
+            talkbox.id = "talkbox";
+            stage.append(talkbox);
+
+            const sleep = ms => new Promise(resolve => setTimeout(resolve,ms));
+
+            const waitboxclick = () => new Promise((resolve) => {
+                talkbox.addEventListener("click",resolve,{once: true})
+            })
+
+            let skip = false;
+            const skipping = () => { skip = true;};
+
+            async function talk(text,ms) {
+                talkbox.addEventListener("click",skipping,{once: true});
+
+                skip = false;
+                
+                for (let char of text) {
+                    if (skip) {
+                        talkbox.textContent = text;
+                        break;
+                    }
+                    talkbox.textContent+=char;
+                    await sleep(ms);
+                }
+                
+                talkbox.removeEventListener("click",skipping);
+                await waitboxclick();
+                talkbox.textContent = "";
+            }
+
+
+
+            const dialogues = [
+                "生日快樂！墨米。",
+                "今天是一個很特別的一天！",
+                "因為在好幾年前，\n你來到了這個世界上！",
+                "雖然那個時候我還不認識你，\n也不知道未來的有一天，\n我們會認識。",
+
+                "你最近過得怎麼樣？",
+                "學校生活還順利吧？",
+                "我們已經好久沒有說話了！",//我真的好想再跟你聊天...再看到一次你的樣子...
+                "……",
+                "嘿！",
+
+                "你最近應該很忙吧？",
+                "15歲了！",
+                "接下來升上九年級的你，\n要面對的事情開始變多了，\n要考慮的東西也開始變多了。",
+                "不過事情也不是你過完生日就出現了，",
+                "而是在這一年裡面，\n你會體驗到很多！",
+
+                "但是不需要有壓力，\n也不需要擔心什麼，",
+                "以後有時間，就好好休息。",
+                "做自己想做的，\n去自己想去的地方，",
+                "或者躺一整天也沒關係。",
+                "生活、社交、課業，",
+                "那些都不急，也都不要緊。",
+
+                "生日快樂！",
+                "祝你一切順利。",
+                "晚安。"
+            ];
+
+            async function notice() {
+                const notice = document.getElementById("notice");
+
+                notice.style.pointerEvents = "none";
+
+                await notice.animate(
+                    [
+                        { opacity: 0},
+                        { opacity: 1}
+                    ],
+                    {
+                        duration: 1000,
+                        fill:"forwards"
+                    }
+                ).finished;
+
+                notice.style.pointerEvents = "auto"
+
+                const noticebutton = document.getElementById("noticebutton");
+
+                await new Promise((resolve) => {
+                    noticebutton.addEventListener("click",async function fadeout() {
+
+                        notice.style.pointerEvents = "none";
+
+                        await notice.animate(
+                            [
+                                { opacity: 1},
+                                { opacity: 0}
+                            ],
+                            {
+                                duration: 1000,
+                                fill:"forwards"
+                            }
+                        ).finished;
+
+                        notice.remove();
+
+                        resolve();
+
+                    },{ once:true});
+                })
+            }
+
+            async function main() {
+                await notice();
+
+                await talkbox.animate(
+                    [
+                        { opacity: 0},
+                        { opacity: 1}
+                    ],
+                    {
+                        duration: 1000,
+                        fill:"forwards"
+                    }
+                ).finished;
+
+                for (let sent of dialogues) {
+                    await talk(sent,80);
+                }
+
+                await talkbox.animate(
+                    [
+                        { opacity: 1},
+                        { opacity: 0}
+                    ],
+                    {
+                        duration: 1000,
+                        fill:"forwards"
+                    }
+                ).finished;
+
+                talkbox.remove();
+                
+                stage.append(cake);
+
+                await cake.animate(
+                    [
+                        { opacity: 0},
+                        { opacity: 1}
+                    ],
+                    {
+                        duration: 1000,
+                        fill:"forwards"
+                    }
+                ).finished;
+            }
+
+            main();
+
+        </script>
+    </body>
+</html>
